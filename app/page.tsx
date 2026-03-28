@@ -84,6 +84,8 @@ export default function Home() {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setUser(null);
+    setLicenseData(null);
+    setError(null);
     setCurrentView('home');
   };
 
@@ -94,6 +96,14 @@ export default function Home() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleViewChange = (view: string) => {
+    if (view === 'home') {
+      setLicenseData(null);
+      setError(null);
+    }
+    setCurrentView(view);
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar 
@@ -101,7 +111,7 @@ export default function Home() {
         user={user} 
         onLogout={handleLogout} 
         currentView={currentView}
-        onViewChange={setCurrentView}
+        onViewChange={handleViewChange}
       />
       
       <main className="flex-grow">
