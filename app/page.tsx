@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Navbar, Hero, LicenseCard, Footer, LicenseData, LoginModal, AdminForm, RecentLicenses } from '@/components/AppComponents';
+import { Navbar, Hero, LicenseCard, Footer, LicenseData, LoginModal, AdminForm, RecentLicenses, SearchResults } from '@/components/AppComponents';
 import { supabase } from '@/lib/supabase';
 
 const MOCK_DATA: LicenseData = {
@@ -24,6 +24,7 @@ const MOCK_DATA: LicenseData = {
 
 export default function Home() {
   const [licenseData, setLicenseData] = React.useState<LicenseData | null>(null);
+  const [searchResults, setSearchResults] = React.useState<LicenseData[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [isLoginModalOpen, setIsLoginModalOpen] = React.useState(false);
@@ -47,31 +48,56 @@ export default function Home() {
   const handleSearch = async (query: string) => {
     if (!query.trim()) {
       setLicenseData(null);
+      setSearchResults([]);
       setError(null);
       return;
     }
 
     setLoading(true);
     setError(null);
-    setCurrentView('home'); // Switch to home to show search result
+    setLicenseData(null);
+    setSearchResults([]);
+    setCurrentView('home');
 
     try {
+      const searchFields = [
+        'tipo_licenca',
+        'processo_no',
+        'licenca_no',
+        'interessado',
+        'endereco_correspondencia',
+        'endereco_atividade',
+        'municipio',
+        'finalidade',
+        'solicitacao_renovacao',
+        'data_recebimento',
+        'validade',
+        'responsavel_tecnico',
+        'responsavel_analise'
+      ];
+      
+      const orQuery = searchFields.map(field => `${field}.ilike.%${query}%`).join(',');
+
       const { data, error: supabaseError } = await supabase
         .from('licencas')
         .select('*')
-        .or(`processo_no.ilike.%${query}%,licenca_no.ilike.%${query}%`)
-        .single();
+        .or(orQuery);
 
       if (supabaseError) {
         console.warn('Supabase error, falling back to mock data:', supabaseError.message);
         if (query.includes('123')) {
           setLicenseData(MOCK_DATA);
         } else {
-          setError('Nenhuma licença encontrada para este número.');
-          setLicenseData(null);
+          setError('Ocorreu um erro ao buscar as licenças.');
+        }
+      } else if (data && data.length > 0) {
+        if (data.length === 1) {
+          setLicenseData(data[0] as LicenseData);
+        } else {
+          setSearchResults(data as LicenseData[]);
         }
       } else {
-        setLicenseData(data as LicenseData);
+        setError('Nenhuma licença encontrada para esta pesquisa.');
       }
     } catch (err) {
       console.error('Search error:', err);
@@ -85,12 +111,14 @@ export default function Home() {
     await supabase.auth.signOut();
     setUser(null);
     setLicenseData(null);
+    setSearchResults([]);
     setError(null);
     setCurrentView('home');
   };
 
   const handleSelectLicense = (license: LicenseData) => {
     setLicenseData(license);
+    setSearchResults([]);
     setCurrentView('home');
     // Scroll to top to show the card
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -99,6 +127,7 @@ export default function Home() {
   const handleViewChange = (view: string) => {
     if (view === 'home') {
       setLicenseData(null);
+      setSearchResults([]);
       setError(null);
     }
     setCurrentView(view);
@@ -112,6 +141,7 @@ export default function Home() {
         onLogout={handleLogout} 
         currentView={currentView}
         onViewChange={handleViewChange}
+        onSearch={handleSearch}
       />
       
       <main className="flex-grow">
@@ -122,7 +152,11 @@ export default function Home() {
             {currentView === 'home' ? (
               <>
                 <Hero onSearch={handleSearch} />
-                <LicenseCard data={licenseData} loading={loading} error={error} />
+                {searchResults.length > 0 ? (
+                  <SearchResults results={searchResults} onSelect={handleSelectLicense} />
+                ) : (
+                  <LicenseCard data={licenseData} loading={loading} error={error} />
+                )}
               </>
             ) : (
               <RecentLicenses onSelect={handleSelectLicense} />

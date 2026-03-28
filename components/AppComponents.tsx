@@ -13,14 +13,26 @@ export const Navbar = ({
   user, 
   onLogout, 
   currentView, 
-  onViewChange 
+  onViewChange,
+  onSearch
 }: { 
   onLoginClick: () => void; 
   user: any; 
   onLogout: () => void;
   currentView: string;
   onViewChange: (view: string) => void;
+  onSearch: (query: string) => void;
 }) => {
+  const [navQuery, setNavQuery] = useState('');
+
+  const handleNavSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (navQuery.trim()) {
+      onSearch(navQuery);
+      setNavQuery('');
+    }
+  };
+
   return (
     <nav className="w-full top-0 sticky z-50 bg-background/80 backdrop-blur-md flex justify-between items-center px-8 py-4 max-w-full mx-auto border-b border-outline-variant/10 print:hidden">
       <div className="flex items-center gap-8">
@@ -48,14 +60,16 @@ export const Navbar = ({
         </div>
       </div>
       <div className="flex items-center gap-4">
-        <div className="relative hidden lg:block">
+        <form onSubmit={handleNavSearch} className="relative hidden lg:block">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-outline w-4 h-4" />
           <input 
             className="pl-10 pr-4 py-2 bg-surface-container-low rounded-xl border-none focus:ring-2 focus:ring-secondary w-64 text-sm outline-none" 
-            placeholder="Buscar no portal..." 
+            placeholder="Buscar licença..." 
             type="text"
+            value={navQuery}
+            onChange={(e) => setNavQuery(e.target.value)}
           />
-        </div>
+        </form>
         {user ? (
           <div className="flex items-center gap-4">
             <span className="text-xs font-bold text-primary uppercase tracking-wider hidden sm:inline">Administrador</span>
@@ -131,7 +145,7 @@ export const Hero = ({ onSearch }: { onSearch: (query: string) => void }) => {
             <Search className="text-outline w-5 h-5 mr-3" />
             <input 
               className="w-full border-none focus:ring-0 bg-transparent text-on-surface placeholder:text-outline/60 font-medium outline-none text-lg" 
-              placeholder="Pesquisar licenças, processos..." 
+              placeholder="Pesquisar por número, interessado, endereço, responsável..." 
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -145,6 +159,22 @@ export const Hero = ({ onSearch }: { onSearch: (query: string) => void }) => {
             <Search className="w-4 h-4" />
           </button>
         </motion.form>
+        
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          className="mt-6 flex flex-wrap gap-x-4 gap-y-2 text-[10px] font-bold text-outline uppercase tracking-widest"
+        >
+          <span>Busca por:</span>
+          <span className="text-primary/60">Processo</span>
+          <span className="text-primary/60">Licença</span>
+          <span className="text-primary/60">Interessado</span>
+          <span className="text-primary/60">Endereço</span>
+          <span className="text-primary/60">Município</span>
+          <span className="text-primary/60">Responsável Técnico</span>
+          <span className="text-primary/60">Finalidade</span>
+        </motion.div>
       </div>
     </section>
   );
@@ -254,6 +284,56 @@ export const RecentLicenses = ({ onSelect }: { onSelect: (license: LicenseData) 
             <p className="text-on-surface-variant font-medium">Nenhuma licença encontrada no sistema.</p>
           </div>
         )}
+      </div>
+    </section>
+  );
+};
+
+export const SearchResults = ({ results, onSelect }: { results: LicenseData[]; onSelect: (license: LicenseData) => void }) => {
+  return (
+    <section className="py-12 px-8 max-w-6xl mx-auto">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h2 className="text-3xl font-black text-on-surface font-headline tracking-tight">Resultados da Busca</h2>
+          <p className="text-on-surface-variant">Encontramos {results.length} registro(s) correspondente(s) à sua pesquisa.</p>
+        </div>
+      </div>
+
+      <div className="grid gap-4">
+        {results.map((license, idx) => (
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: idx * 0.05 }}
+            key={idx}
+            onClick={() => onSelect(license)}
+            className="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/10 hover:border-primary/30 hover:shadow-xl transition-all cursor-pointer flex flex-col md:flex-row md:items-center justify-between gap-4 group"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-bold text-on-surface text-lg">{license.licenca_no}</h3>
+                <p className="text-sm text-on-surface-variant font-medium">{license.interessado}</p>
+              </div>
+            </div>
+            
+            <div className="flex flex-wrap items-center gap-6">
+              <div className="text-right">
+                <p className="text-[10px] uppercase tracking-widest text-outline font-bold mb-1">Processo</p>
+                <p className="text-sm font-semibold text-on-surface">{license.processo_no}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-[10px] uppercase tracking-widest text-outline font-bold mb-1">Validade</p>
+                <p className="text-sm font-semibold text-on-surface">{license.validade.split(' ')[0]}</p>
+              </div>
+              <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${license.status === 'Ativa' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                {license.status}
+              </div>
+            </div>
+          </motion.div>
+        ))}
       </div>
     </section>
   );
