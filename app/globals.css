@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #0d631b;
+  --color-primary-container: #2e7d32;
+  --color-on-primary: #ffffff;
+  --color-secondary: #005db7;
+  --color-on-secondary: #ffffff;
+  --color-tertiary: #005f63;
+  --color-on-tertiary: #ffffff;
+  --color-background: #f8f9fa;
+  --color-on-background: #191c1d;
+  --color-surface: #f8f9fa;
+  --color-on-surface: #191c1d;
+  --color-surface-container-low: #f3f4f5;
+  --color-surface-container-high: #e7e8e9;
+  --color-surface-container-highest: #e1e3e4;
+  --color-surface-container-lowest: #ffffff;
+  --color-on-surface-variant: #40493d;
+  --color-outline: #707a6c;
+  --color-outline-variant: #bfcaba;
+  --color-primary-fixed: #a3f69c;
+  --color-on-primary-fixed: #002204;
+  --color-tertiary-fixed: #a6eff3;
+  --color-on-tertiary-fixed: #002021;
+
+  --font-headline: var(--font-headline);
+  --font-body: var(--font-body);
+}
+
+@layer base {
+  body {
+    @apply bg-background text-on-background font-body;
+  }
+}
+
+@layer components {
+  .signature-gradient {
+    background: linear-gradient(135deg, #0d631b 0%, #2e7d32 100%);
+  }
+  
+  .glass-panel {
+    background: rgba(46, 125, 50, 0.05);
+    backdrop-filter: blur(12px);
+  }
+}
+
+@media print {
+  nav, footer, .print\:hidden {
+    display: none !important;
+  }
+  
+  body {
+    background-color: white !important;
+  }
+  
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  .max-w-6xl {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}
