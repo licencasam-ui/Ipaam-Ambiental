@@ -40,7 +40,7 @@ export const Navbar = ({
           className="text-2xl font-black text-primary font-headline tracking-tight cursor-pointer" 
           onClick={() => onViewChange('home')}
         >
-          IPAAM Ambiental
+          IPAAM Licenças Ambientais
         </span>
         <div className="hidden md:flex gap-6 items-center">
           <button 
@@ -127,8 +127,8 @@ export const Hero = ({ onSearch }: { onSearch: (query: string, field?: string) =
           animate={{ opacity: 1, y: 0 }}
           className="font-headline text-6xl font-extrabold text-on-surface mb-6 leading-tight max-w-2xl"
         >
-          Portal de Inteligência <br />
-          <span className="text-primary">Ambiental</span>
+          Portal de Consulta <br />
+          <span className="text-primary">Licenças Ambientais</span>
         </motion.h1>
         <motion.p 
           initial={{ opacity: 0, y: 20 }}

@@ -13,7 +13,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'IPAAM Ambiental - Portal de Inteligência',
+  title: 'IPAAM Licenças Ambientais - Portal de Consulta',
   description: 'Consulte licenças, processos e autorizações ambientais do Estado do Amazonas.',
 };
 
