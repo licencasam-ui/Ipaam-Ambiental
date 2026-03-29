@@ -55,7 +55,12 @@ export const Navbar = ({
           >
             Licenças
           </button>
-          <a className="font-headline font-semibold tracking-tight text-on-surface-variant hover:text-primary transition-colors" href="#">Transparência</a>
+          <button 
+            onClick={() => onViewChange('transparency')}
+            className={`font-headline font-semibold tracking-tight transition-colors pb-1 ${currentView === 'transparency' ? 'text-primary border-b-2 border-primary' : 'text-on-surface-variant hover:text-primary'}`}
+          >
+            Transparência
+          </button>
           <a className="font-headline font-semibold tracking-tight text-on-surface-variant hover:text-primary transition-colors" href="#">Contato</a>
         </div>
       </div>
@@ -637,6 +642,67 @@ export const LicenseCard = ({ data, loading, error }: { data: LicenseData | null
         </div>
       </div>
     </motion.section>
+  );
+};
+
+export const TransparencyView = ({ onSearch }: { onSearch: (query: string) => void }) => {
+  const licenseTypes = [
+    { id: 'LP', label: 'Licença Prévia (LP)', icon: 'P' },
+    { id: 'LI', label: 'Licença de Instalação (LI)', icon: 'I' },
+    { id: 'LO', label: 'Licença de Operação (LO)', icon: 'O' },
+    { id: 'AA', label: 'Autorização Ambiental (AA)', icon: 'A' },
+    { id: 'LUP', label: 'Licença Única Preventiva (LUP)', icon: 'U' },
+    { id: 'LAS', label: 'Licença Ambiental Simplificada (LAS)', icon: 'S' },
+    { id: 'ASV', label: 'Autorização de Supressão Vegetal (ASV)', icon: 'V' },
+    { id: 'OUT', label: 'Outorga de Direito de Uso', icon: 'D' },
+    { id: 'RLO', label: 'Renovação de Licença (RLO)', icon: 'R' },
+    { id: 'LOP', label: 'Operação Provisória (LOP)', icon: 'OP' },
+    { id: 'LMS', label: 'Licença Municipal (LMS)', icon: 'M' },
+    { id: 'DLA', label: 'Dispensa de Licença (DLA)', icon: 'X' },
+  ];
+
+  return (
+    <section className="py-16 px-8 max-w-6xl mx-auto">
+      <div className="mb-12 text-center">
+        <h2 className="text-4xl font-black text-on-surface font-headline tracking-tight mb-4">Portal da Transparência</h2>
+        <p className="text-on-surface-variant text-lg max-w-2xl mx-auto">
+          Selecione uma categoria abaixo para listar todas as licenças e autorizações emitidas por modalidade.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {licenseTypes.map((type, idx) => (
+          <motion.button
+            key={type.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.05 }}
+            onClick={() => onSearch(type.id)}
+            className="group bg-surface-container-lowest p-8 rounded-3xl border border-outline-variant/10 hover:border-primary/40 hover:shadow-2xl transition-all flex flex-col items-center text-center gap-6"
+          >
+            <div className="w-16 h-16 rounded-2xl bg-primary/5 flex items-center justify-center text-primary text-2xl font-black group-hover:bg-primary group-hover:text-white transition-all transform group-hover:rotate-6">
+              {type.icon}
+            </div>
+            <div>
+              <h3 className="font-bold text-on-surface text-lg mb-2 leading-tight">{type.label}</h3>
+              <p className="text-xs text-on-surface-variant font-medium uppercase tracking-widest">Consultar Base</p>
+            </div>
+          </motion.button>
+        ))}
+      </div>
+
+      <div className="mt-16 p-8 bg-surface-container-low rounded-3xl border border-outline-variant/10 flex flex-col md:flex-row items-center gap-8">
+        <div className="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
+          <ShieldCheck className="w-8 h-8" />
+        </div>
+        <div className="flex-grow">
+          <h4 className="font-bold text-on-surface text-xl mb-1">Dados Abertos e Integridade</h4>
+          <p className="text-on-surface-variant text-sm">
+            Todas as consultas realizadas neste portal são baseadas em dados oficiais do IPAAM, garantindo a integridade e publicidade dos atos administrativos ambientais do Estado do Amazonas.
+          </p>
+        </div>
+      </div>
+    </section>
   );
 };
 

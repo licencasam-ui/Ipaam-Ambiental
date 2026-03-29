@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Navbar, Hero, LicenseCard, Footer, LicenseData, LoginModal, AdminForm, RecentLicenses, SearchResults } from '@/components/AppComponents';
+import { Navbar, Hero, LicenseCard, Footer, LicenseData, LoginModal, AdminForm, RecentLicenses, SearchResults, TransparencyView } from '@/components/AppComponents';
 import { supabase } from '@/lib/supabase';
 
 const MOCK_DATA: LicenseData = {
@@ -158,8 +158,10 @@ export default function Home() {
                   <LicenseCard data={licenseData} loading={loading} error={error} />
                 )}
               </>
-            ) : (
+            ) : currentView === 'licenses' ? (
               <RecentLicenses onSelect={handleSelectLicense} />
+            ) : (
+              <TransparencyView onSearch={handleSearch} />
             )}
           </>
         )}
