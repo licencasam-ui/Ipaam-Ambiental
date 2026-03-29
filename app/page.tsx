@@ -45,7 +45,7 @@ export default function Home() {
     return () => subscription.unsubscribe();
   }, []);
 
-  const handleSearch = async (query: string) => {
+  const handleSearch = async (query: string, filterField?: string) => {
     if (!query.trim()) {
       setLicenseData(null);
       setSearchResults([]);
@@ -60,28 +60,34 @@ export default function Home() {
     setCurrentView('home');
 
     try {
-      const searchFields = [
-        'tipo_licenca',
-        'processo_no',
-        'licenca_no',
-        'interessado',
-        'endereco_correspondencia',
-        'endereco_atividade',
-        'municipio',
-        'finalidade',
-        'solicitacao_renovacao',
-        'data_recebimento',
-        'validade',
-        'responsavel_tecnico',
-        'responsavel_analise'
-      ];
-      
-      const orQuery = searchFields.map(field => `${field}.ilike.%${query}%`).join(',');
+      let supabaseQuery = supabase.from('licencas').select('*');
 
-      const { data, error: supabaseError } = await supabase
-        .from('licencas')
-        .select('*')
-        .or(orQuery);
+      if (filterField) {
+        // If a specific field is provided, filter only by that field
+        supabaseQuery = supabaseQuery.ilike(filterField, `%${query}%`);
+      } else {
+        // Global search across all relevant fields
+        const searchFields = [
+          'tipo_licenca',
+          'processo_no',
+          'licenca_no',
+          'interessado',
+          'endereco_correspondencia',
+          'endereco_atividade',
+          'municipio',
+          'finalidade',
+          'solicitacao_renovacao',
+          'data_recebimento',
+          'validade',
+          'responsavel_tecnico',
+          'responsavel_analise'
+        ];
+        
+        const orQuery = searchFields.map(field => `${field}.ilike.%${query}%`).join(',');
+        supabaseQuery = supabaseQuery.or(orQuery);
+      }
+
+      const { data, error: supabaseError } = await supabaseQuery;
 
       if (supabaseError) {
         console.warn('Supabase error, falling back to mock data:', supabaseError.message);

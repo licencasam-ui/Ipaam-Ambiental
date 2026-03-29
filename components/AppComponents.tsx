@@ -21,7 +21,7 @@ export const Navbar = ({
   onLogout: () => void;
   currentView: string;
   onViewChange: (view: string) => void;
-  onSearch: (query: string) => void;
+  onSearch: (query: string, field?: string) => void;
 }) => {
   const [navQuery, setNavQuery] = useState('');
 
@@ -100,7 +100,7 @@ export const Navbar = ({
   );
 };
 
-export const Hero = ({ onSearch }: { onSearch: (query: string) => void }) => {
+export const Hero = ({ onSearch }: { onSearch: (query: string, field?: string) => void }) => {
   const [query, setQuery] = React.useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -645,7 +645,7 @@ export const LicenseCard = ({ data, loading, error }: { data: LicenseData | null
   );
 };
 
-export const TransparencyView = ({ onSearch }: { onSearch: (query: string) => void }) => {
+export const TransparencyView = ({ onSearch }: { onSearch: (query: string, field?: string) => void }) => {
   const licenseTypes = [
     { id: 'LP', label: 'Licença Prévia (LP)', icon: 'P' },
     { id: 'LI', label: 'Licença de Instalação (LI)', icon: 'I' },
@@ -677,7 +677,7 @@ export const TransparencyView = ({ onSearch }: { onSearch: (query: string) => vo
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.05 }}
-            onClick={() => onSearch(type.id)}
+            onClick={() => onSearch(type.id, 'tipo_licenca')}
             className="group bg-surface-container-lowest p-8 rounded-3xl border border-outline-variant/10 hover:border-primary/40 hover:shadow-2xl transition-all flex flex-col items-center text-center gap-6"
           >
             <div className="w-16 h-16 rounded-2xl bg-primary/5 flex items-center justify-center text-primary text-2xl font-black group-hover:bg-primary group-hover:text-white transition-all transform group-hover:rotate-6">
