@@ -2,7 +2,7 @@
 
 import React, { useRef, useState } from 'react';
 import Image from 'next/image';
-import { Search, LogIn, Printer, FileDown, ShieldCheck, X, Save, Plus, LogOut, Loader2 } from 'lucide-react';
+import { Search, LogIn, Printer, FileDown, ShieldCheck, X, Save, Plus, LogOut, Loader2, ArrowLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { supabase } from '@/lib/supabase';
 import html2canvas from 'html2canvas';
@@ -203,7 +203,7 @@ export interface LicenseData {
   publicada: boolean;
 }
 
-export const RecentLicenses = ({ onSelect }: { onSelect: (license: LicenseData) => void }) => {
+export const RecentLicenses = ({ onSelect, onBack }: { onSelect: (license: LicenseData) => void; onBack: () => void }) => {
   const [licenses, setLicenses] = useState<LicenseData[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -238,6 +238,14 @@ export const RecentLicenses = ({ onSelect }: { onSelect: (license: LicenseData) 
 
   return (
     <section className="py-12 px-8 max-w-6xl mx-auto">
+      <button 
+        onClick={onBack}
+        className="mb-8 flex items-center gap-2 text-primary font-bold hover:gap-3 transition-all group"
+      >
+        <ArrowLeft className="w-5 h-5" />
+        <span>Voltar</span>
+      </button>
+
       <div className="flex items-center justify-between mb-8">
         <div>
           <h2 className="text-3xl font-black text-on-surface font-headline tracking-tight">Licenças Recentes</h2>
@@ -294,9 +302,17 @@ export const RecentLicenses = ({ onSelect }: { onSelect: (license: LicenseData) 
   );
 };
 
-export const SearchResults = ({ results, onSelect }: { results: LicenseData[]; onSelect: (license: LicenseData) => void }) => {
+export const SearchResults = ({ results, onSelect, onBack }: { results: LicenseData[]; onSelect: (license: LicenseData) => void; onBack: () => void }) => {
   return (
     <section className="py-12 px-8 max-w-6xl mx-auto">
+      <button 
+        onClick={onBack}
+        className="mb-8 flex items-center gap-2 text-primary font-bold hover:gap-3 transition-all group"
+      >
+        <ArrowLeft className="w-5 h-5" />
+        <span>Voltar</span>
+      </button>
+
       <div className="flex items-center justify-between mb-8">
         <div>
           <h2 className="text-3xl font-black text-on-surface font-headline tracking-tight">Resultados da Busca</h2>
@@ -344,7 +360,7 @@ export const SearchResults = ({ results, onSelect }: { results: LicenseData[]; o
   );
 };
 
-export const LicenseCard = ({ data, loading, error }: { data: LicenseData | null; loading: boolean; error: string | null }) => {
+export const LicenseCard = ({ data, loading, error, onBack }: { data: LicenseData | null; loading: boolean; error: string | null; onBack?: () => void }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -516,6 +532,15 @@ export const LicenseCard = ({ data, loading, error }: { data: LicenseData | null
   if (error) {
     return (
       <div className="max-w-6xl mx-auto py-12 px-8">
+        {onBack && (
+          <button 
+            onClick={onBack}
+            className="mb-8 flex items-center gap-2 text-primary font-bold hover:gap-3 transition-all group"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span>Voltar</span>
+          </button>
+        )}
         <div className="bg-error-container text-on-error-container p-6 rounded-xl border border-error/20 flex items-center gap-4">
           <ShieldCheck className="w-8 h-8 text-error" />
           <div>
@@ -535,6 +560,16 @@ export const LicenseCard = ({ data, loading, error }: { data: LicenseData | null
       animate={{ opacity: 1, scale: 1 }}
       className="max-w-6xl mx-auto py-12 px-8 mb-16"
     >
+      {onBack && (
+        <button 
+          onClick={onBack}
+          className="mb-8 flex items-center gap-2 text-primary font-bold hover:gap-3 transition-all group print:hidden"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          <span>Voltar</span>
+        </button>
+      )}
+      
       <div className="flex items-center justify-between mb-8 print:hidden">
         <h2 className="font-headline text-2xl font-bold text-on-surface flex items-center gap-3">
           <span className="w-8 h-1 bg-primary rounded-full"></span>
@@ -645,7 +680,7 @@ export const LicenseCard = ({ data, loading, error }: { data: LicenseData | null
   );
 };
 
-export const TransparencyView = ({ onSearch }: { onSearch: (query: string, field?: string) => void }) => {
+export const TransparencyView = ({ onSearch, onBack }: { onSearch: (query: string, field?: string) => void; onBack: () => void }) => {
   const licenseTypes = [
     { id: 'LP', label: 'Licença Prévia (LP)', icon: 'P' },
     { id: 'LI', label: 'Licença de Instalação (LI)', icon: 'I' },
@@ -663,6 +698,14 @@ export const TransparencyView = ({ onSearch }: { onSearch: (query: string, field
 
   return (
     <section className="py-16 px-8 max-w-6xl mx-auto">
+      <button 
+        onClick={onBack}
+        className="mb-8 flex items-center gap-2 text-primary font-bold hover:gap-3 transition-all group"
+      >
+        <ArrowLeft className="w-5 h-5" />
+        <span>Voltar</span>
+      </button>
+
       <div className="mb-12 text-center">
         <h2 className="text-4xl font-black text-on-surface font-headline tracking-tight mb-4">Portal da Transparência</h2>
         <p className="text-on-surface-variant text-lg max-w-2xl mx-auto">

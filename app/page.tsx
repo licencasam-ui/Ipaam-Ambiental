@@ -30,6 +30,16 @@ export default function Home() {
   const [isLoginModalOpen, setIsLoginModalOpen] = React.useState(false);
   const [user, setUser] = React.useState<any>(null);
   const [currentView, setCurrentView] = React.useState('home');
+  const [history, setHistory] = React.useState<any[]>([]);
+
+  const pushHistory = () => {
+    setHistory(prev => [...prev, {
+      view: currentView,
+      searchResults: [...searchResults],
+      licenseData: licenseData ? {...licenseData} : null,
+      error: error
+    }]);
+  };
 
   React.useEffect(() => {
     // Check current session
@@ -55,6 +65,7 @@ export default function Home() {
 
     setLoading(true);
     setError(null);
+    pushHistory();
     setLicenseData(null);
     setSearchResults([]);
     setCurrentView('home');
@@ -123,9 +134,11 @@ export default function Home() {
     setSearchResults([]);
     setError(null);
     setCurrentView('home');
+    setHistory([]);
   };
 
   const handleSelectLicense = (license: LicenseData) => {
+    pushHistory();
     setLicenseData(license);
     setSearchResults([]);
     setCurrentView('home');
@@ -134,12 +147,32 @@ export default function Home() {
   };
 
   const handleViewChange = (view: string) => {
+    if (view === currentView && !licenseData && searchResults.length === 0 && !error) return;
+    pushHistory();
     if (view === 'home') {
       setLicenseData(null);
       setSearchResults([]);
       setError(null);
     }
     setCurrentView(view);
+  };
+
+  const handleBack = () => {
+    if (history.length === 0) {
+      setLicenseData(null);
+      setSearchResults([]);
+      setError(null);
+      setCurrentView('home');
+      return;
+    }
+
+    const lastState = history[history.length - 1];
+    setHistory(prev => prev.slice(0, -1));
+
+    setCurrentView(lastState.view);
+    setSearchResults(lastState.searchResults || []);
+    setLicenseData(lastState.licenseData || null);
+    setError(lastState.error || null);
   };
 
   return (
@@ -162,15 +195,30 @@ export default function Home() {
               <>
                 <Hero onSearch={handleSearch} />
                 {searchResults.length > 0 ? (
-                  <SearchResults results={searchResults} onSelect={handleSelectLicense} />
+                  <SearchResults 
+                    results={searchResults} 
+                    onSelect={handleSelectLicense} 
+                    onBack={handleBack} 
+                  />
                 ) : (
-                  <LicenseCard data={licenseData} loading={loading} error={error} />
+                  <LicenseCard 
+                    data={licenseData} 
+                    loading={loading} 
+                    error={error} 
+                    onBack={licenseData || error || history.length > 0 ? handleBack : undefined} 
+                  />
                 )}
               </>
             ) : currentView === 'licenses' ? (
-              <RecentLicenses onSelect={handleSelectLicense} />
+              <RecentLicenses 
+                onSelect={handleSelectLicense} 
+                onBack={handleBack} 
+              />
             ) : (
-              <TransparencyView onSearch={handleSearch} />
+              <TransparencyView 
+                onSearch={handleSearch} 
+                onBack={handleBack} 
+              />
             )}
           </>
         )}
