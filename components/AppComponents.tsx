@@ -712,7 +712,7 @@ export const Footer = () => {
       <div className="flex flex-col md:flex-row justify-between items-center px-8 gap-4 max-w-full mx-auto">
         <div className="flex flex-col gap-1">
           <span className="font-bold text-on-surface">IPAAM</span>
-          <p className="text-xs text-on-surface-variant">© 2024 IPAAM - Instituto de Proteção Ambiental do Amazonas. Todos os direitos reservados.</p>
+          <p className="text-xs text-on-surface-variant">© 2026 IPAAM - Instituto de Proteção Ambiental do Amazonas. Todos os direitos reservados. Projeto Desenvolvido por José Narbaes</p>
         </div>
         <div className="flex gap-6">
           <a className="text-xs text-on-surface-variant hover:text-secondary transition-colors" href="#">Privacidade</a>
