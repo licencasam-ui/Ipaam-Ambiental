@@ -83,7 +83,10 @@ export default function Home() {
           'responsavel_analise'
         ];
         
-        const orQuery = searchFields.map(field => `${field}.ilike.%${query}%`).join(',');
+        // Escape special characters for Supabase .or() syntax by wrapping in double quotes
+        // and escaping existing double quotes
+        const escapedQuery = query.replace(/"/g, '\\"');
+        const orQuery = searchFields.map(field => `${field}.ilike."%${escapedQuery}%"`).join(',');
         supabaseQuery = supabaseQuery.or(orQuery);
       }
 
