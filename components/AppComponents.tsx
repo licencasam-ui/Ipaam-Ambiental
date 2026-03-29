@@ -894,7 +894,15 @@ export const AdminForm = ({ onSaveSuccess }: { onSaveSuccess: () => void }) => {
         .from('licencas')
         .insert([formData]);
 
-      if (supabaseError) throw supabaseError;
+      if (supabaseError) {
+        if (supabaseError.message.includes('licencas_licenca_no_key')) {
+          throw new Error('Já existe uma licença cadastrada com este número (Licença Nº). Por favor, verifique os dados.');
+        }
+        if (supabaseError.message.includes('licencas_processo_no_key')) {
+          throw new Error('Já existe uma licença cadastrada com este número de Processo. Por favor, verifique os dados.');
+        }
+        throw supabaseError;
+      }
       
       setSuccess(true);
       setFormData({
