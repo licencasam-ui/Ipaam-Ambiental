@@ -172,13 +172,13 @@ export const Hero = ({ onSearch }: { onSearch: (query: string, field?: string) =
           className="mt-6 flex flex-wrap gap-x-4 gap-y-2 text-[10px] font-bold text-outline uppercase tracking-widest"
         >
           <span>Busca por:</span>
-          <span className="text-primary/60">Processo</span>
-          <span className="text-primary/60">Licença</span>
-          <span className="text-primary/60">Interessado</span>
-          <span className="text-primary/60">Endereço</span>
-          <span className="text-primary/60">Município</span>
-          <span className="text-primary/60">Responsável Técnico</span>
-          <span className="text-primary/60">Finalidade</span>
+          <button onClick={() => onSearch('', 'processo_no')} className="text-primary/60 hover:text-primary transition-colors">Processo</button>
+          <button onClick={() => onSearch('', 'licenca_no')} className="text-primary/60 hover:text-primary transition-colors">Licença</button>
+          <button onClick={() => onSearch('', 'interessado')} className="text-primary/60 hover:text-primary transition-colors">Interessado</button>
+          <button onClick={() => onSearch('', 'endereco_atividade')} className="text-primary/60 hover:text-primary transition-colors">Endereço</button>
+          <button onClick={() => onSearch('', 'municipio')} className="text-primary/60 hover:text-primary transition-colors">Município</button>
+          <button onClick={() => onSearch('', 'responsavel_tecnico')} className="text-primary/60 hover:text-primary transition-colors">Responsável Técnico</button>
+          <button onClick={() => onSearch('', 'finalidade')} className="text-primary/60 hover:text-primary transition-colors">Finalidade</button>
         </motion.div>
       </div>
     </section>
@@ -302,7 +302,7 @@ export const RecentLicenses = ({ onSelect, onBack }: { onSelect: (license: Licen
   );
 };
 
-export const SearchResults = ({ results, onSelect, onBack, filterField }: { results: LicenseData[]; onSelect: (license: LicenseData) => void; onBack: () => void; filterField?: string | null }) => {
+export const SearchResults = ({ results, onSelect, onBack, filterField, query }: { results: LicenseData[]; onSelect: (license: LicenseData) => void; onBack: () => void; filterField?: string | null; query?: string }) => {
   return (
     <section className="py-12 px-8 max-w-6xl mx-auto">
       <button 
@@ -315,12 +315,14 @@ export const SearchResults = ({ results, onSelect, onBack, filterField }: { resu
 
       <div className="flex items-center justify-between mb-8">
         <div>
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex flex-wrap items-center gap-3 mb-2">
             <h2 className="text-3xl font-black text-on-surface font-headline tracking-tight">Resultados da Busca</h2>
             {filterField && (
-              <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-primary/20">
-                Filtro: {filterField === 'tipo_licenca' ? 'Tipo de Licença' : filterField}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-primary/20">
+                  {filterField === 'tipo_licenca' ? 'Categoria' : 'Campo'}: {query || 'Todos'}
+                </span>
+              </div>
             )}
           </div>
           <p className="text-on-surface-variant">Encontramos {results.length} registro(s) correspondente(s) à sua pesquisa.</p>
@@ -727,7 +729,7 @@ export const TransparencyView = ({ onSearch, onBack }: { onSearch: (query: strin
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.05 }}
-            onClick={() => onSearch(type.id, 'tipo_licenca')}
+            onClick={() => onSearch(type.label, 'tipo_licenca')}
             className="group bg-surface-container-lowest p-8 rounded-3xl border border-outline-variant/10 hover:border-primary/40 hover:shadow-2xl transition-all flex flex-col items-center text-center gap-6"
           >
             <div className="w-16 h-16 rounded-2xl bg-primary/5 flex items-center justify-center text-primary text-2xl font-black group-hover:bg-primary group-hover:text-white transition-all transform group-hover:rotate-6">
@@ -985,7 +987,15 @@ export const AdminForm = ({ onSaveSuccess }: { onSaveSuccess: () => void }) => {
               <option>Licença de Operação (LO)</option>
               <option>Licença de Instalação (LI)</option>
               <option>Licença Prévia (LP)</option>
-              <option>Autorização Ambiental</option>
+              <option>Autorização Ambiental (AA)</option>
+              <option>Licença Única Preventiva (LUP)</option>
+              <option>Licença Ambiental Simplificada (LAS)</option>
+              <option>Autorização de Supressão Vegetal (ASV)</option>
+              <option>Outorga de Direito de Uso</option>
+              <option>Renovação de Licença (RLO)</option>
+              <option>Operação Provisória (LOP)</option>
+              <option>Licença Municipal (LMS)</option>
+              <option>Dispensa de Licença (DLA)</option>
             </select>
           </div>
 

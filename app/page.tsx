@@ -32,6 +32,7 @@ export default function Home() {
   const [currentView, setCurrentView] = React.useState('home');
   const [history, setHistory] = React.useState<any[]>([]);
   const [searchField, setSearchField] = React.useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = React.useState<string>('');
 
   const pushHistory = () => {
     setHistory(prev => [...prev, {
@@ -39,6 +40,7 @@ export default function Home() {
       searchResults: [...searchResults],
       licenseData: licenseData ? {...licenseData} : null,
       searchField: searchField,
+      searchQuery: searchQuery,
       error: error
     }]);
   };
@@ -58,7 +60,7 @@ export default function Home() {
   }, []);
 
   const handleSearch = async (query: string, filterField?: string) => {
-    if (!query.trim()) {
+    if (!query.trim() && !filterField) {
       setLicenseData(null);
       setSearchResults([]);
       setError(null);
@@ -71,6 +73,7 @@ export default function Home() {
     setLicenseData(null);
     setSearchResults([]);
     setSearchField(filterField || null);
+    setSearchQuery(query);
     setCurrentView('home');
 
     try {
@@ -176,6 +179,7 @@ export default function Home() {
     setCurrentView(lastState.view);
     setSearchResults(lastState.searchResults || []);
     setSearchField(lastState.searchField || null);
+    setSearchQuery(lastState.searchQuery || '');
     setLicenseData(lastState.licenseData || null);
     setError(lastState.error || null);
   };
@@ -205,6 +209,7 @@ export default function Home() {
                     onSelect={handleSelectLicense} 
                     onBack={handleBack} 
                     filterField={searchField}
+                    query={searchQuery}
                   />
                 ) : (
                   <LicenseCard 
