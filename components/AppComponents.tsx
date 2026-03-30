@@ -892,6 +892,13 @@ export const AdminForm = ({ onSaveSuccess }: { onSaveSuccess: () => void }) => {
     setFormData(prev => ({ ...prev, [name]: val }));
   };
 
+  const getAbbreviation = (tipo: string) => {
+    const match = tipo.match(/\(([^)]+)\)/);
+    if (match) return match[1];
+    if (tipo.includes('Autorização')) return 'AA';
+    return tipo.split(' ')[0].substring(0, 2).toUpperCase();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -899,8 +906,16 @@ export const AdminForm = ({ onSaveSuccess }: { onSaveSuccess: () => void }) => {
     setSuccess(false);
 
     try {
+      const abbr = getAbbreviation(formData.tipo_licenca || '');
+      
+      let finalLicencaNo = formData.licenca_no || '';
+      if (abbr && !finalLicencaNo.toUpperCase().startsWith(abbr.toUpperCase())) {
+        finalLicencaNo = `${abbr} ${finalLicencaNo}`;
+      }
+
       const dataToSave = {
         ...formData,
+        licenca_no: finalLicencaNo,
       };
 
       const { error: supabaseError } = await supabase
@@ -910,7 +925,7 @@ export const AdminForm = ({ onSaveSuccess }: { onSaveSuccess: () => void }) => {
       if (supabaseError) {
         // Check for unique constraint violation on licenca_no or processo_no
         if (supabaseError.message.includes('licencas_licenca_no_key') || supabaseError.code === '23505') {
-          throw new Error(`Já existe uma licença cadastrada com este número (${formData.licenca_no}) ou Processo (${formData.processo_no}). Por favor, verifique os dados.`);
+          throw new Error(`Já existe uma licença cadastrada com este número (${finalLicencaNo}) ou Processo (${formData.processo_no}). Por favor, verifique os dados.`);
         }
         throw supabaseError;
       }
