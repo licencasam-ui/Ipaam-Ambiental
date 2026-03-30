@@ -729,12 +729,7 @@ export const TransparencyView = ({ onSearch, onBack }: { onSearch: (query: strin
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.05 }}
-            onClick={() => {
-              // O usuário solicitou especificamente que ao clicar em LO, mostre LI
-              // Isso pode ser para facilitar a visualização de licenças relacionadas ou um requisito específico de teste
-              const searchTerm = type.id === 'LO' ? 'Licença de Instalação (LI)' : type.label;
-              onSearch(searchTerm, 'tipo_licenca');
-            }}
+            onClick={() => onSearch(type.label, 'tipo_licenca')}
             className="group bg-surface-container-lowest p-8 rounded-3xl border border-outline-variant/10 hover:border-primary/40 hover:shadow-2xl transition-all flex flex-col items-center text-center gap-6"
           >
             <div className="w-16 h-16 rounded-2xl bg-primary/5 flex items-center justify-center text-primary text-2xl font-black group-hover:bg-primary group-hover:text-white transition-all transform group-hover:rotate-6">

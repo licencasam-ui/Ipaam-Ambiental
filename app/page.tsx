@@ -123,7 +123,7 @@ export default function Home() {
           setSearchResults(data as LicenseData[]);
         }
       } else {
-        setError('Nenhuma licença encontrada para esta pesquisa.');
+        setError('Nenhuma licença encontrada para esta pesquisa. Tente usar termos diferentes ou verifique se a licença já foi cadastrada.');
       }
     } catch (err) {
       console.error('Search error:', err);
