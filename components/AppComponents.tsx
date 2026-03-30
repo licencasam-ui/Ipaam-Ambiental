@@ -897,19 +897,24 @@ export const AdminForm = ({ onSaveSuccess }: { onSaveSuccess: () => void }) => {
     setSuccess(false);
 
     try {
-      // Prepend abbreviation to licenca_no if not already there to avoid duplicate key errors
-      // when different types share the same number (e.g. LP 002/2026 vs LO 002/2026)
+      // Prepend abbreviation to licenca_no and processo_no if not already there to avoid duplicate key errors
+      // when different types share the same numbers (e.g. LP 002/2026 vs LO 002/2026)
       const abbr = getAbbreviation(formData.tipo_licenca || '');
-      let finalLicencaNo = formData.licenca_no || '';
       
-      // Only prepend if it doesn't already start with the abbreviation
+      let finalLicencaNo = formData.licenca_no || '';
       if (abbr && !finalLicencaNo.toUpperCase().startsWith(abbr.toUpperCase())) {
         finalLicencaNo = `${abbr} ${finalLicencaNo}`;
       }
 
+      let finalProcessoNo = formData.processo_no || '';
+      if (abbr && !finalProcessoNo.toUpperCase().startsWith(abbr.toUpperCase())) {
+        finalProcessoNo = `${abbr} ${finalProcessoNo}`;
+      }
+
       const dataToSave = {
         ...formData,
-        licenca_no: finalLicencaNo
+        licenca_no: finalLicencaNo,
+        processo_no: finalProcessoNo
       };
 
       const { error: supabaseError } = await supabase
@@ -921,7 +926,7 @@ export const AdminForm = ({ onSaveSuccess }: { onSaveSuccess: () => void }) => {
           throw new Error(`Já existe uma licença cadastrada com este número (${finalLicencaNo}). Verifique se esta licença já foi inserida ou se o número está correto.`);
         }
         if (supabaseError.message.includes('licencas_processo_no_key')) {
-          throw new Error('Já existe uma licença cadastrada com este número de Processo. Por favor, verifique os dados.');
+          throw new Error(`Já existe uma licença cadastrada com este número de Processo (${finalProcessoNo}). Verifique se este processo já foi inserido para este tipo de licença.`);
         }
         throw supabaseError;
       }
