@@ -892,13 +892,6 @@ export const AdminForm = ({ onSaveSuccess }: { onSaveSuccess: () => void }) => {
     setFormData(prev => ({ ...prev, [name]: val }));
   };
 
-  const getAbbreviation = (tipo: string) => {
-    const match = tipo.match(/\(([^)]+)\)/);
-    if (match) return match[1];
-    if (tipo.includes('Autorização')) return 'AA';
-    return tipo.split(' ')[0].substring(0, 2).toUpperCase();
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -906,24 +899,8 @@ export const AdminForm = ({ onSaveSuccess }: { onSaveSuccess: () => void }) => {
     setSuccess(false);
 
     try {
-      // Prepend abbreviation to licenca_no and processo_no if not already there to avoid duplicate key errors
-      // when different types share the same numbers (e.g. LP 002/2026 vs LO 002/2026)
-      const abbr = getAbbreviation(formData.tipo_licenca || '');
-      
-      let finalLicencaNo = formData.licenca_no || '';
-      if (abbr && !finalLicencaNo.toUpperCase().startsWith(abbr.toUpperCase())) {
-        finalLicencaNo = `${abbr} ${finalLicencaNo}`;
-      }
-
-      let finalProcessoNo = formData.processo_no || '';
-      if (abbr && !finalProcessoNo.toUpperCase().startsWith(abbr.toUpperCase())) {
-        finalProcessoNo = `${abbr} ${finalProcessoNo}`;
-      }
-
       const dataToSave = {
         ...formData,
-        licenca_no: finalLicencaNo,
-        processo_no: finalProcessoNo
       };
 
       const { error: supabaseError } = await supabase
@@ -933,7 +910,7 @@ export const AdminForm = ({ onSaveSuccess }: { onSaveSuccess: () => void }) => {
       if (supabaseError) {
         // Check for unique constraint violation on licenca_no or processo_no
         if (supabaseError.message.includes('licencas_licenca_no_key') || supabaseError.code === '23505') {
-          throw new Error(`Já existe uma licença cadastrada com este número (${finalLicencaNo}) ou Processo (${finalProcessoNo}). Por favor, verifique se esta licença já foi inserida para este tipo.`);
+          throw new Error(`Já existe uma licença cadastrada com este número (${formData.licenca_no}) ou Processo (${formData.processo_no}). Por favor, verifique os dados.`);
         }
         throw supabaseError;
       }
