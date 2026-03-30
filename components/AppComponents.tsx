@@ -996,7 +996,7 @@ export const AdminForm = ({ onSaveSuccess }: { onSaveSuccess: () => void }) => {
 
           <div className="space-y-2">
             <label className="text-[10px] font-bold text-outline uppercase tracking-widest">Licença Nº</label>
-            <input required name="licenca_no" value={formData.licenca_no || ''} onChange={handleChange} className="w-full px-4 py-3 bg-surface-container-low rounded-xl border-none focus:ring-2 focus:ring-primary outline-none text-sm" placeholder="Ex: LO 458/2024" />
+            <input required name="licenca_no" value={formData.licenca_no || ''} onChange={handleChange} className="w-full px-4 py-3 bg-surface-container-low rounded-xl border-none focus:ring-2 focus:ring-primary outline-none text-sm" placeholder="Ex: LI 458/2024" />
           </div>
 
           <div className="space-y-2">
