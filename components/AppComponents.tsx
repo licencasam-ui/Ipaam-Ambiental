@@ -302,7 +302,7 @@ export const RecentLicenses = ({ onSelect, onBack }: { onSelect: (license: Licen
   );
 };
 
-export const SearchResults = ({ results, onSelect, onBack }: { results: LicenseData[]; onSelect: (license: LicenseData) => void; onBack: () => void }) => {
+export const SearchResults = ({ results, onSelect, onBack, filterField }: { results: LicenseData[]; onSelect: (license: LicenseData) => void; onBack: () => void; filterField?: string | null }) => {
   return (
     <section className="py-12 px-8 max-w-6xl mx-auto">
       <button 
@@ -315,7 +315,14 @@ export const SearchResults = ({ results, onSelect, onBack }: { results: LicenseD
 
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h2 className="text-3xl font-black text-on-surface font-headline tracking-tight">Resultados da Busca</h2>
+          <div className="flex items-center gap-3 mb-2">
+            <h2 className="text-3xl font-black text-on-surface font-headline tracking-tight">Resultados da Busca</h2>
+            {filterField && (
+              <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-primary/20">
+                Filtro: {filterField === 'tipo_licenca' ? 'Tipo de Licença' : filterField}
+              </span>
+            )}
+          </div>
           <p className="text-on-surface-variant">Encontramos {results.length} registro(s) correspondente(s) à sua pesquisa.</p>
         </div>
       </div>

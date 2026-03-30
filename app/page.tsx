@@ -31,12 +31,14 @@ export default function Home() {
   const [user, setUser] = React.useState<any>(null);
   const [currentView, setCurrentView] = React.useState('home');
   const [history, setHistory] = React.useState<any[]>([]);
+  const [searchField, setSearchField] = React.useState<string | null>(null);
 
   const pushHistory = () => {
     setHistory(prev => [...prev, {
       view: currentView,
       searchResults: [...searchResults],
       licenseData: licenseData ? {...licenseData} : null,
+      searchField: searchField,
       error: error
     }]);
   };
@@ -68,6 +70,7 @@ export default function Home() {
     pushHistory();
     setLicenseData(null);
     setSearchResults([]);
+    setSearchField(filterField || null);
     setCurrentView('home');
 
     try {
@@ -161,6 +164,7 @@ export default function Home() {
     if (history.length === 0) {
       setLicenseData(null);
       setSearchResults([]);
+      setSearchField(null);
       setError(null);
       setCurrentView('home');
       return;
@@ -171,6 +175,7 @@ export default function Home() {
 
     setCurrentView(lastState.view);
     setSearchResults(lastState.searchResults || []);
+    setSearchField(lastState.searchField || null);
     setLicenseData(lastState.licenseData || null);
     setError(lastState.error || null);
   };
@@ -199,6 +204,7 @@ export default function Home() {
                     results={searchResults} 
                     onSelect={handleSelectLicense} 
                     onBack={handleBack} 
+                    filterField={searchField}
                   />
                 ) : (
                   <LicenseCard 
