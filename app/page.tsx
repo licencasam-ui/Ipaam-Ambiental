@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Navbar, Hero, LicenseCard, Footer, LicenseData, LoginModal, AdminForm, RecentLicenses, SearchResults, TransparencyView } from '@/components/AppComponents';
-import { supabase } from '@/lib/supabase';
+import { supabase, getTableName } from '@/lib/supabase';
 
 const MOCK_DATA: LicenseData = {
   tipo_licenca: "Licença de Operação (LO)",
@@ -77,7 +77,14 @@ export default function Home() {
     setCurrentView('home');
 
     try {
-      let supabaseQuery = supabase.from('licencas').select('*');
+      let tableName = 'all_licencas';
+      
+      // Se estivermos filtrando por tipo_licenca, podemos ir direto na tabela específica
+      if (filterField === 'tipo_licenca') {
+        tableName = getTableName(query);
+      }
+      
+      let supabaseQuery = supabase.from(tableName).select('*');
 
       if (filterField) {
         // If a specific field is provided, filter only by that field

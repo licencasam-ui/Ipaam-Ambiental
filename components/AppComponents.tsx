@@ -4,7 +4,7 @@ import React, { useRef, useState } from 'react';
 import Image from 'next/image';
 import { Search, LogIn, Printer, FileDown, ShieldCheck, X, Save, Plus, LogOut, Loader2, ArrowLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { supabase } from '@/lib/supabase';
+import { supabase, getTableName } from '@/lib/supabase';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
@@ -211,7 +211,7 @@ export const RecentLicenses = ({ onSelect, onBack }: { onSelect: (license: Licen
     const fetchRecent = async () => {
       try {
         const { data, error } = await supabase
-          .from('licencas')
+          .from('all_licencas')
           .select('*')
           .order('created_at', { ascending: false })
           .limit(10);
@@ -696,6 +696,7 @@ export const TransparencyView = ({ onSearch, onBack }: { onSearch: (query: strin
     { id: 'LO', label: 'Licença de Operação (LO)', icon: 'O' },
     { id: 'AA', label: 'Autorização Ambiental (AA)', icon: 'A' },
     { id: 'LUP', label: 'Licença Única Preventiva (LUP)', icon: 'U' },
+    { id: 'LAU', label: 'Licença Ambiental Única (LAU)', icon: 'LA' },
     { id: 'LAS', label: 'Licença Ambiental Simplificada (LAS)', icon: 'S' },
     { id: 'ASV', label: 'Autorização de Supressão Vegetal (ASV)', icon: 'V' },
     { id: 'OUT', label: 'Outorga de Direito de Uso', icon: 'D' },
@@ -918,8 +919,10 @@ export const AdminForm = ({ onSaveSuccess }: { onSaveSuccess: () => void }) => {
         licenca_no: finalLicencaNo,
       };
 
+      const tableName = getTableName(formData.tipo_licenca || '');
+
       const { error: supabaseError } = await supabase
-        .from('licencas')
+        .from(tableName)
         .insert([dataToSave]);
 
       if (supabaseError) {
@@ -977,6 +980,7 @@ export const AdminForm = ({ onSaveSuccess }: { onSaveSuccess: () => void }) => {
               <option>Licença de Operação (LO)</option>
               <option>Licença de Instalação (LI)</option>
               <option>Licença Prévia (LP)</option>
+              <option>Licença Ambiental Única (LAU)</option>
               <option>Autorização Ambiental (AA)</option>
               <option>Licença Única Preventiva (LUP)</option>
               <option>Licença Ambiental Simplificada (LAS)</option>
