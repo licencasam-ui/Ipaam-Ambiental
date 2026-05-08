@@ -100,6 +100,7 @@ export default function Home() {
           'endereco_atividade',
           'municipio',
           'finalidade',
+          'condicionantes',
           'solicitacao_renovacao',
           'data_recebimento',
           'validade',

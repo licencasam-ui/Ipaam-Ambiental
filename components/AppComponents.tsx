@@ -200,6 +200,7 @@ export interface LicenseData {
   responsavel_tecnico: string;
   responsavel_analise: string;
   status: string;
+  condicionantes?: string;
   publicada: boolean;
 }
 
@@ -634,6 +635,13 @@ export const LicenseCard = ({ data, loading, error, onBack }: { data: LicenseDat
             <p className="text-on-surface text-sm leading-relaxed">{data.finalidade}</p>
           </div>
 
+          {data.condicionantes && (
+            <div className="md:col-span-3">
+              <p className="text-[10px] font-bold text-outline uppercase tracking-widest mb-2">CONDICIONANTES</p>
+              <p className="text-on-surface text-sm leading-relaxed whitespace-pre-wrap">{data.condicionantes}</p>
+            </div>
+          )}
+
           <div className="md:col-span-3">
             <p className="text-[10px] font-bold text-outline uppercase tracking-widest mb-2">ENDEREÇO DA ATIVIDADE LICENCIADA</p>
             <p className="text-on-surface text-sm">{data.endereco_atividade}</p>
@@ -1046,6 +1054,11 @@ export const AdminForm = ({ onSaveSuccess }: { onSaveSuccess: () => void }) => {
           <div className="md:col-span-2 space-y-2">
             <label className="text-[10px] font-bold text-outline uppercase tracking-widest">Finalidade</label>
             <textarea name="finalidade" value={formData.finalidade || ''} onChange={handleChange} className="w-full px-4 py-3 bg-surface-container-low rounded-xl border-none focus:ring-2 focus:ring-primary outline-none text-sm min-h-[100px]" placeholder="Descreva a finalidade da licença..." />
+          </div>
+
+          <div className="md:col-span-2 space-y-2">
+            <label className="text-[10px] font-bold text-outline uppercase tracking-widest">Condicionantes</label>
+            <textarea name="condicionantes" value={formData.condicionantes || ''} onChange={handleChange} className="w-full px-4 py-3 bg-surface-container-low rounded-xl border-none focus:ring-2 focus:ring-primary outline-none text-sm min-h-[120px]" placeholder="Insira as condicionantes da licença..." />
           </div>
 
           <div className="md:col-span-2 space-y-2">
