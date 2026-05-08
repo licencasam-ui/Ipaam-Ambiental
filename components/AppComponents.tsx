@@ -2,7 +2,7 @@
 
 import React, { useRef, useState } from 'react';
 import Image from 'next/image';
-import { Search, LogIn, Printer, FileDown, ShieldCheck, X, Save, Plus, LogOut, Loader2, ArrowLeft } from 'lucide-react';
+import { Search, LogIn, Printer, FileDown, ShieldCheck, X, Save, Plus, LogOut, Loader2, ArrowLeft, Eye } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { supabase, getTableName } from '@/lib/supabase';
 import html2canvas from 'html2canvas';
@@ -279,6 +279,11 @@ export const RecentLicenses = ({ onSelect, onBack }: { onSelect: (license: Licen
             </div>
             
             <div className="flex flex-wrap items-center gap-6">
+              {license.pdf_url && (
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary" title="Documento PDF disponível">
+                  <Eye className="w-4 h-4" />
+                </div>
+              )}
               <div className="text-right">
                 <p className="text-[10px] uppercase tracking-widest text-outline font-bold mb-1">Processo</p>
                 <p className="text-sm font-semibold text-on-surface">{license.processo_no}</p>
@@ -352,6 +357,11 @@ export const SearchResults = ({ results, onSelect, onBack, filterField, query }:
             </div>
             
             <div className="flex flex-wrap items-center gap-6">
+              {license.pdf_url && (
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary" title="Documento PDF disponível">
+                  <Eye className="w-4 h-4" />
+                </div>
+              )}
               <div className="text-right">
                 <p className="text-[10px] uppercase tracking-widest text-outline font-bold mb-1">Processo</p>
                 <p className="text-sm font-semibold text-on-surface">{license.processo_no}</p>
@@ -592,13 +602,13 @@ export const LicenseCard = ({ data, loading, error, onBack }: { data: LicenseDat
               href={data.pdf_url} 
               target="_blank" 
               rel="noopener noreferrer"
-              className="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-sm text-xs font-bold uppercase tracking-wider flex items-center gap-1 hover:bg-secondary-container/80 transition-colors"
+              className="bg-primary text-on-primary px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-2 hover:bg-primary/90 transition-all shadow-sm hover:shadow-md"
             >
-              <FileDown className="w-3 h-3" />
-              Download PDF
+              <Eye className="w-4 h-4" />
+              Visualizar Licença
             </a>
           )}
-          <span className="bg-primary-fixed text-on-primary-fixed px-3 py-1 rounded-sm text-xs font-bold uppercase tracking-wider">{data.status}</span>
+          <span className="bg-primary-fixed text-on-primary-fixed px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider flex items-center">{data.status}</span>
           {data.publicada && (
             <span className="bg-tertiary-fixed text-on-tertiary-fixed px-3 py-1 rounded-sm text-xs font-bold uppercase tracking-wider">Publicada</span>
           )}
