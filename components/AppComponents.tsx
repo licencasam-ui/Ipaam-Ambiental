@@ -201,6 +201,7 @@ export interface LicenseData {
   responsavel_analise: string;
   status: string;
   condicionantes?: string;
+  pdf_url?: string;
   publicada: boolean;
 }
 
@@ -586,6 +587,17 @@ export const LicenseCard = ({ data, loading, error, onBack }: { data: LicenseDat
           Resultado da Consulta
         </h2>
         <div className="flex gap-2">
+          {data.pdf_url && (
+            <a 
+              href={data.pdf_url} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-sm text-xs font-bold uppercase tracking-wider flex items-center gap-1 hover:bg-secondary-container/80 transition-colors"
+            >
+              <FileDown className="w-3 h-3" />
+              Download PDF
+            </a>
+          )}
           <span className="bg-primary-fixed text-on-primary-fixed px-3 py-1 rounded-sm text-xs font-bold uppercase tracking-wider">{data.status}</span>
           {data.publicada && (
             <span className="bg-tertiary-fixed text-on-tertiary-fixed px-3 py-1 rounded-sm text-xs font-bold uppercase tracking-wider">Publicada</span>
@@ -1044,6 +1056,11 @@ export const AdminForm = ({ onSaveSuccess }: { onSaveSuccess: () => void }) => {
           <div className="space-y-2">
             <label className="text-[10px] font-bold text-outline uppercase tracking-widest">Município</label>
             <input required name="municipio" value={formData.municipio || ''} onChange={handleChange} className="w-full px-4 py-3 bg-surface-container-low rounded-xl border-none focus:ring-2 focus:ring-primary outline-none text-sm" placeholder="Ex: Manaus / AM" />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-outline uppercase tracking-widest">Link do PDF (Opcional)</label>
+            <input name="pdf_url" value={formData.pdf_url || ''} onChange={handleChange} className="w-full px-4 py-3 bg-surface-container-low rounded-xl border-none focus:ring-2 focus:ring-primary outline-none text-sm" placeholder="https://exemplo.com/licenca.pdf" />
           </div>
 
           <div className="flex items-center gap-3 pt-6">
