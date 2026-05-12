@@ -93,10 +93,11 @@ export const Navbar = ({
             {profile?.role === 'Administrator' && (
               <button 
                 onClick={() => onViewChange('users')}
-                className={`p-2 rounded-lg transition-all ${currentView === 'users' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-surface-container-high text-on-surface hover:bg-primary/10 hover:text-primary'}`}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${currentView === 'users' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-surface-container-high text-on-surface hover:bg-primary/10 hover:text-primary'}`}
                 title="Gerenciar Usuários"
               >
                 <Users className="w-5 h-5" />
+                <span className="text-xs font-bold hidden xl:inline">Usuários</span>
               </button>
             )}
             <button 

@@ -44,15 +44,18 @@ export default function Home() {
         .eq('id', userId)
         .single();
       
+      const ADMIN_EMAIL = 'licencas.am@gmail.com';
+      const isOwner = email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+      
       if (error) {
-        // If profile doesn't exist, create a default one (usually for first user or newly signs up)
+        // If profile doesn't exist, create a default one
         const { data: allProfiles } = await supabase.from('profiles').select('id').limit(1);
         const isFirstUser = !allProfiles || allProfiles.length === 0;
         
         const newProfile = {
           id: userId,
           email: email || '',
-          role: isFirstUser ? 'Administrator' : 'User'
+          role: (isFirstUser || isOwner) ? 'Administrator' : 'User'
         };
 
         const { data: created, error: createError } = await supabase
@@ -63,7 +66,18 @@ export default function Home() {
         
         if (!createError) setProfile(created as UserProfile);
       } else {
-        setProfile(data as UserProfile);
+        // If profile exists but it is the owner and role is not Admin, fix it
+        if (isOwner && data.role !== 'Administrator') {
+          const { data: updated } = await supabase
+            .from('profiles')
+            .update({ role: 'Administrator' })
+            .eq('id', userId)
+            .select()
+            .single();
+          setProfile(updated as UserProfile);
+        } else {
+          setProfile(data as UserProfile);
+        }
       }
     } catch (err) {
       console.error('Error fetching profile:', err);
