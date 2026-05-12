@@ -65,16 +65,15 @@ export default function Home() {
           .single();
         
         if (!createError) setProfile(created as UserProfile);
+        else if (isOwner) setProfile(newProfile as UserProfile); // Force admin state for owner even if insert fails
       } else {
         // If profile exists but it is the owner and role is not Admin, fix it
         if (isOwner && data.role !== 'Administrator') {
-          const { data: updated } = await supabase
+          setProfile({ ...data, role: 'Administrator' } as UserProfile); // Set state immediately
+          await supabase
             .from('profiles')
             .update({ role: 'Administrator' })
-            .eq('id', userId)
-            .select()
-            .single();
-          setProfile(updated as UserProfile);
+            .eq('id', userId);
         } else {
           setProfile(data as UserProfile);
         }
