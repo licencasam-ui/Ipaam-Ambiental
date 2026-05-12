@@ -1,8 +1,9 @@
 'use client';
 
 import React from 'react';
-import { Navbar, Hero, LicenseCard, Footer, LicenseData, LoginModal, AdminForm, RecentLicenses, SearchResults, TransparencyView } from '@/components/AppComponents';
+import { Navbar, Hero, LicenseCard, Footer, LicenseData, LoginModal, AdminForm, RecentLicenses, SearchResults, TransparencyView, UserManagement, UserProfile } from '@/components/AppComponents';
 import { supabase, getTableName } from '@/lib/supabase';
+import { ShieldCheck, ArrowLeft } from 'lucide-react';
 
 const MOCK_DATA: LicenseData = {
   tipo_licenca: "Licença de Operação (LO)",
@@ -29,10 +30,45 @@ export default function Home() {
   const [error, setError] = React.useState<string | null>(null);
   const [isLoginModalOpen, setIsLoginModalOpen] = React.useState(false);
   const [user, setUser] = React.useState<any>(null);
+  const [profile, setProfile] = React.useState<UserProfile | null>(null);
   const [currentView, setCurrentView] = React.useState('home');
   const [history, setHistory] = React.useState<any[]>([]);
   const [searchField, setSearchField] = React.useState<string | null>(null);
   const [searchQuery, setSearchQuery] = React.useState<string>('');
+
+  const fetchProfile = async (userId: string, email?: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      
+      if (error) {
+        // If profile doesn't exist, create a default one (usually for first user or newly signs up)
+        const { data: allProfiles } = await supabase.from('profiles').select('id').limit(1);
+        const isFirstUser = !allProfiles || allProfiles.length === 0;
+        
+        const newProfile = {
+          id: userId,
+          email: email || '',
+          role: isFirstUser ? 'Administrator' : 'User'
+        };
+
+        const { data: created, error: createError } = await supabase
+          .from('profiles')
+          .insert([newProfile])
+          .select()
+          .single();
+        
+        if (!createError) setProfile(created as UserProfile);
+      } else {
+        setProfile(data as UserProfile);
+      }
+    } catch (err) {
+      console.error('Error fetching profile:', err);
+    }
+  };
 
   const pushHistory = () => {
     setHistory(prev => [...prev, {
@@ -49,11 +85,15 @@ export default function Home() {
     // Check current session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
+      if (session?.user) fetchProfile(session.user.id, session.user.email);
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      if (currentUser) fetchProfile(currentUser.id, currentUser.email);
+      else setProfile(null);
     });
 
     return () => subscription.unsubscribe();
@@ -197,6 +237,7 @@ export default function Home() {
       <Navbar 
         onLoginClick={() => setIsLoginModalOpen(true)} 
         user={user} 
+        profile={profile}
         onLogout={handleLogout} 
         currentView={currentView}
         onViewChange={handleViewChange}
@@ -205,7 +246,43 @@ export default function Home() {
       
       <main className="flex-grow">
         {user ? (
-          <AdminForm onSaveSuccess={() => {}} />
+          currentView === 'users' ? (
+            profile?.role === 'Administrator' ? (
+              <UserManagement />
+            ) : (
+              <div className="flex flex-col items-center justify-center py-20 text-center px-8">
+                <div className="w-20 h-20 rounded-full bg-error-container flex items-center justify-center text-error mb-6">
+                  <ShieldCheck className="w-10 h-10" />
+                </div>
+                <h2 className="text-2xl font-black text-on-surface mb-2">Acesso Restrito</h2>
+                <p className="text-on-surface-variant max-w-md">Você não possui permissões de administrador para acessar o gerenciamento de usuários.</p>
+                <button 
+                  onClick={() => setCurrentView('home')}
+                  className="mt-8 bg-primary text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2 hover:opacity-90 transition-all"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                  Voltar para o Início
+                </button>
+              </div>
+            )
+          ) : profile?.role === 'Administrator' ? (
+            <AdminForm onSaveSuccess={() => {}} />
+          ) : (
+            <div className="flex flex-col items-center justify-center py-20 text-center px-8">
+              <div className="w-20 h-20 rounded-full bg-secondary-container flex items-center justify-center text-secondary mb-6">
+                <ShieldCheck className="w-10 h-10" />
+              </div>
+              <h2 className="text-2xl font-black text-on-surface mb-2">Área do Usuário</h2>
+              <p className="text-on-surface-variant max-w-md">Bem-vindo, {profile?.email || 'Usuário'}. No momento, seu perfil permite apenas a visualização de dados públicos. Contate o administrador se precisar registrar novas licenças.</p>
+              <button 
+                onClick={() => setCurrentView('home')}
+                className="mt-8 bg-primary text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2 hover:opacity-90 transition-all"
+              >
+                <ArrowLeft className="w-5 h-5" />
+                Ir para o Portal de Consulta
+              </button>
+            </div>
+          )
         ) : (
           <>
             {currentView === 'home' ? (

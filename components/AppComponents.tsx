@@ -2,15 +2,23 @@
 
 import React, { useRef, useState } from 'react';
 import Image from 'next/image';
-import { Search, LogIn, Printer, FileDown, ShieldCheck, X, Save, Plus, LogOut, Loader2, ArrowLeft, Eye } from 'lucide-react';
+import { Search, LogIn, Printer, FileDown, ShieldCheck, X, Save, Plus, LogOut, Loader2, ArrowLeft, Eye, Users, UserPlus, Trash2, Key, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { supabase, getTableName } from '@/lib/supabase';
 import html2canvas from 'html2canvas';
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  role: 'Administrator' | 'User';
+  created_at?: string;
+}
 import { jsPDF } from 'jspdf';
 
 export const Navbar = ({ 
   onLoginClick, 
   user, 
+  profile,
   onLogout, 
   currentView, 
   onViewChange,
@@ -18,6 +26,7 @@ export const Navbar = ({
 }: { 
   onLoginClick: () => void; 
   user: any; 
+  profile?: UserProfile | null;
   onLogout: () => void;
   currentView: string;
   onViewChange: (view: string) => void;
@@ -77,7 +86,19 @@ export const Navbar = ({
         </form>
         {user ? (
           <div className="flex items-center gap-4">
-            <span className="text-xs font-bold text-primary uppercase tracking-wider hidden sm:inline">Administrador</span>
+            <div className="flex flex-col items-end mr-2">
+              <span className="text-[10px] font-black text-primary uppercase tracking-widest leading-none mb-1">{profile?.role || 'Usuário'}</span>
+              <span className="text-[9px] text-outline truncate max-w-[120px] leading-none">{user.email}</span>
+            </div>
+            {profile?.role === 'Administrator' && (
+              <button 
+                onClick={() => onViewChange('users')}
+                className={`p-2 rounded-lg transition-all ${currentView === 'users' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-surface-container-high text-on-surface hover:bg-primary/10 hover:text-primary'}`}
+                title="Gerenciar Usuários"
+              >
+                <Users className="w-5 h-5" />
+              </button>
+            )}
             <button 
               onClick={onLogout}
               className="bg-surface-container-high text-on-surface px-4 py-2 rounded-lg font-semibold text-sm hover:bg-error-container hover:text-on-error-container transition-all flex items-center gap-2"
@@ -904,6 +925,236 @@ export const LoginModal = ({ isOpen, onClose, onLoginSuccess }: { isOpen: boolea
         </div>
       )}
     </AnimatePresence>
+  );
+};
+
+export const UserManagement = () => {
+  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isAdding, setIsAdding] = useState(false);
+  const [newUser, setNewUser] = useState({ email: '', password: '', role: 'User' as 'Administrator' | 'User' });
+  const [actionLoading, setActionLoading] = useState(false);
+
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const { data, error: fetchError } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (fetchError) throw fetchError;
+      setUsers(data || []);
+    } catch (err: any) {
+      setError(err.message || 'Erro ao carregar usuários');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setActionLoading(true);
+    setError(null);
+
+    try {
+      // For creating a user without logging out the current admin, 
+      // in a real app you'd use a server-side function.
+      // For this prototype, we'll suggest using invitations or 
+      // inform that signing up might affect the current session if not handled.
+      // However, we'll try to use the current auth flow and then re-fetch.
+      
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: newUser.email,
+        password: newUser.password,
+      });
+
+      if (authError) throw authError;
+
+      if (authData.user) {
+        // Create profile
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert([{
+            id: authData.user.id,
+            email: newUser.email,
+            role: newUser.role
+          }]);
+
+        if (profileError) throw profileError;
+        
+        setIsAdding(false);
+        setNewUser({ email: '', password: '', role: 'User' });
+        fetchUsers();
+      }
+    } catch (err: any) {
+      setError(err.message || 'Erro ao criar usuário');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleToggleRole = async (user: UserProfile) => {
+    const newRole = user.role === 'Administrator' ? 'User' : 'Administrator';
+    try {
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ role: newRole })
+        .eq('id', user.id);
+
+      if (updateError) throw updateError;
+      fetchUsers();
+    } catch (err: any) {
+      setError(err.message || 'Erro ao atualizar papel do usuário');
+    }
+  };
+
+  const handleDeleteProfile = async (id: string) => {
+    if (!confirm('Deseja realmente remover este perfil? O usuário continuará no Auth mas perderá acesso administrativo.')) return;
+    try {
+      const { error: deleteError } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', id);
+
+      if (deleteError) throw deleteError;
+      fetchUsers();
+    } catch (err: any) {
+      setError(err.message || 'Erro ao remover perfil');
+    }
+  };
+
+  return (
+    <section className="max-w-6xl mx-auto py-12 px-8">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h2 className="font-headline text-3xl font-black text-on-surface flex items-center gap-3">
+            <Users className="text-primary w-8 h-8" />
+            Gerenciamento de Usuários
+          </h2>
+          <p className="text-on-surface-variant font-medium">Controle de acessos e perfis do sistema.</p>
+        </div>
+        <button 
+          onClick={() => setIsAdding(!isAdding)}
+          className="bg-primary text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
+        >
+          {isAdding ? <X className="w-5 h-5" /> : <UserPlus className="w-5 h-5" />}
+          {isAdding ? 'Cancelar' : 'Novo Usuário'}
+        </button>
+      </div>
+
+      <AnimatePresence>
+        {isAdding && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mb-12 overflow-hidden"
+          >
+            <form onSubmit={handleCreateUser} className="bg-surface-container-low p-8 rounded-3xl border border-primary/20 grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+              <div className="md:col-span-1 space-y-2">
+                <label className="text-[10px] font-bold text-outline uppercase tracking-widest">E-mail</label>
+                <input required type="email" value={newUser.email} onChange={(e) => setNewUser({...newUser, email: e.target.value})} className="w-full px-4 py-3 bg-surface-container-lowest rounded-xl border-none outline-none text-sm focus:ring-2 focus:ring-primary" placeholder="usuario@ipaam.am.gov.br" />
+              </div>
+              <div className="md:col-span-1 space-y-2">
+                <label className="text-[10px] font-bold text-outline uppercase tracking-widest">Senha Temporária</label>
+                <input required type="password" value={newUser.password} onChange={(e) => setNewUser({...newUser, password: e.target.value})} className="w-full px-4 py-3 bg-surface-container-lowest rounded-xl border-none outline-none text-sm focus:ring-2 focus:ring-primary" placeholder="••••••••" />
+              </div>
+              <div className="md:col-span-1 space-y-2">
+                <label className="text-[10px] font-bold text-outline uppercase tracking-widest">Perfil</label>
+                <select value={newUser.role} onChange={(e) => setNewUser({...newUser, role: e.target.value as any})} className="w-full px-4 py-3 bg-surface-container-lowest rounded-xl border-none outline-none text-sm focus:ring-2 focus:ring-primary">
+                  <option value="User">Usuário</option>
+                  <option value="Administrator">Administrador</option>
+                </select>
+              </div>
+              <button disabled={actionLoading} className="bg-primary text-white py-3.5 rounded-xl font-bold flex justify-center items-center gap-2 hover:opacity-90 transition-all disabled:opacity-50">
+                {actionLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Save className="w-5 h-5" /> Cadastrar</>}
+              </button>
+            </form>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {error && (
+        <div className="bg-error-container text-on-error-container p-4 rounded-xl mb-6 flex items-center justify-between">
+          <p className="text-sm font-medium">{error}</p>
+          <button onClick={() => setError(null)}><X className="w-4 h-4" /></button>
+        </div>
+      )}
+
+      <div className="bg-surface-container-lowest rounded-3xl border border-outline-variant/10 overflow-hidden shadow-sm">
+        <table className="w-full text-left">
+          <thead className="bg-surface-container-high border-b border-outline-variant/10">
+            <tr>
+              <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-outline">Usuário</th>
+              <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-outline">Perfil</th>
+              <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-outline">Data de Acesso</th>
+              <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-outline text-right">Ações</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-outline-variant/10">
+            {loading ? (
+              <tr>
+                <td colSpan={4} className="px-8 py-12 text-center">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto" />
+                </td>
+              </tr>
+            ) : users.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="px-8 py-12 text-center text-on-surface-variant italic">
+                  Nenhum registro encontrado.
+                </td>
+              </tr>
+            ) : users.map((user) => (
+              <tr key={user.id} className="hover:bg-surface-container-low transition-colors">
+                <td className="px-8 py-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                      {user.email?.[0].toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-bold text-on-surface text-sm">{user.email}</p>
+                      <p className="text-[10px] text-outline truncate max-w-[150px]">{user.id}</p>
+                    </div>
+                  </div>
+                </td>
+                <td className="px-8 py-4">
+                  <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${user.role === 'Administrator' ? 'bg-primary-fixed text-on-primary-fixed' : 'bg-secondary-container text-on-secondary-container'}`}>
+                    {user.role}
+                  </span>
+                </td>
+                <td className="px-8 py-4 text-xs font-medium text-on-surface-variant">
+                  {user.created_at ? new Date(user.created_at).toLocaleDateString('pt-BR') : 'N/A'}
+                </td>
+                <td className="px-8 py-4 text-right">
+                  <div className="flex justify-end gap-2">
+                    <button 
+                      onClick={() => handleToggleRole(user)}
+                      className="p-2 rounded-lg hover:bg-surface-container-high text-on-surface-variant hover:text-primary transition-all"
+                      title="Alterar Perfil"
+                    >
+                      <Shield className="w-4 h-4" />
+                    </button>
+                    <button 
+                      onClick={() => handleDeleteProfile(user.id)}
+                      className="p-2 rounded-lg hover:bg-error-container text-on-surface-variant hover:text-error transition-all"
+                      title="Remover Perfil"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
   );
 };
 
